@@ -204,7 +204,6 @@ class Pose(bpy.types.Operator):
 
 
 # ------------------------------------------------------------------
-
 class UI_Material(bpy.types.Panel):
     bl_category = "72craft"   #侧边栏标签
     bl_label = "眼透&刘海阴影&辉光"     #工具卷展栏标签
@@ -244,14 +243,16 @@ class UI_Output(bpy.types.Panel):
         row1.scale_y=1
         row1.operator(Horizontal.bl_idname,text="横屏")
         row1.operator(Vertical.bl_idname,text="竖屏")
-        
-        
+        row2 = self.layout.row(align=True)
+        row2.scale_y=1
+        row2.operator(Hz30.bl_idname,text="30Hz")
+        row2.operator(Hz60.bl_idname,text="60Hz")
 # ------------------------------------------------------------------
 
 classes = [
     UI_Material,UI_Pose,UI_Output,
     Compositor,AOV,Pose,
-    Horizontal,Vertical
+    Horizontal,Vertical,Hz30,Hz60
 ]
 
 

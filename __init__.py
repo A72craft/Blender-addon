@@ -69,7 +69,7 @@ class AOV(bpy.types.Operator):
             else:
                 pass
         
-        eye_mat = ["眉睫","白目","目","目光","眉毛","眼白","眼睛"]
+        eye_mat = ["眉睫","白目","目","目光","眉毛","眼白","眼睛","瞳孔"]
         face_mat = ["顏","脸","颜","脸"]
         hair_mat = ["头发","髪"]
         eye_cnt = len(eye_mat)
@@ -206,7 +206,7 @@ class Pose(bpy.types.Operator):
 # ------------------------------------------------------------------
 class UI_Material(bpy.types.Panel):
     bl_category = "72craft"   #侧边栏标签
-    bl_label = "眼透&刘海阴影&辉光"     #工具卷展栏标签
+    bl_label = "渲染"     #工具卷展栏标签
     bl_idname = "OBJECT_material_set"   #工具ID
     bl_space_type = 'VIEW_3D'   #空间类型():3D视图
     bl_region_type = 'UI'       #区域类型:右边侧栏

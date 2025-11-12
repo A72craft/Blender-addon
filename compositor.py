@@ -21,8 +21,8 @@ def generate_compositor_scene():
 
 
 	def compos_node_group():
-		"""Initialize 眼透&辉光&刘海阴影 node group"""
-		compos = bpy.data.node_groups.new(type = 'CompositorNodeTree', name = "眼透&辉光&刘海阴影")
+		"""Initialize 渲染 node group"""
+		compos = bpy.data.node_groups.new(type = 'CompositorNodeTree', name = "渲染")
 
 		compos.color_tag = 'NONE'
 		compos.description = "用于合成器中的节点"

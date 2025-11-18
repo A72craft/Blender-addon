@@ -1,10 +1,140 @@
 import bpy
 import mathutils
+from .constants import *
+
+
+class Compositor(bpy.types.Operator):
+    """设置合成器相关设置和节点"""
+    # Unique ID for the operator
+    bl_idname = "render.compositor_setup"
+    # Name that appears in the Blender search menu
+    bl_label = "72craft_设置合成器"
+
+    # The execute() function runs when the operator is called
+    def execute(self, context):
+        # The main action: print the message
+        context.view_layer.use_pass_z = True
+        bpy.context.view_layer.eevee.use_pass_transparent = True
+        
+        bpy.context.scene.use_nodes = True
+        
+        new_scene = generate_compositor_scene()
+        
+        if new_scene:
+            # --- 3. Report Success to the User ---
+            self.report({'INFO'}, f"已设置合成器相关设置！")
+            return {'FINISHED'}
+        else:
+            # --- 4. Report Failure if something went wrong ---
+            self.report({'ERROR'}, "未能设置合成器")
+            return {'CANCELLED'}
+
+class AOV(bpy.types.Operator):
+    """设置AOV输出,并在相应材质中添加AOV节点"""
+    bl_idname = "render.aov_setup"
+    bl_label = "72craft_设置AOV"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    @classmethod
+    def poll(cls, context):
+        # Only enable if a mesh object is selected
+        return (context.active_object is not None and 
+                context.active_object.type == 'MESH' and 
+                context.active_object.select_get())
+    
+    def execute(self, context):
+        view_layer = context.view_layer
+        warning_flag = False
+        
+        # Get the selected mesh object
+        selected_mesh = context.active_object
+        if not selected_mesh or selected_mesh.type != 'MESH':
+            self.report({'ERROR'}, "请选择一个网格对象!")
+            return {'CANCELLED'}
+        
+        # --- Define the list of AOV names we want to add ---
+        aovs = {
+            "face": 'COLOR',
+            "eye_val": 'VALUE',
+            "eye_mat": 'COLOR'
+        }
+        
+        for name,aov_type in aovs.items():
+            # Check if the AOV already exists to avoid duplicates
+            if name not in view_layer.aovs:
+                # If it doesn't exist, create it.
+                new_aov = view_layer.aovs.add()
+                new_aov.name = name
+                new_aov.type = aov_type
+            else:
+                pass
+        
+        eye_mat = MATERIALS_EYE
+        face_mat = MATERIALS_FACE
+        hair_mat = MATERIALS_HAIR
+        
+        found_face = False
+        found_eye = False
+        
+        # Only process materials from the selected mesh
+        for material_slot in selected_mesh.material_slots:
+            if material_slot.material is None:
+                continue
+                
+            material = material_slot.material
+            # Check if the material's name is in our target list
+            if material.name in face_mat:
+                found_face = True
+                tree = material.node_tree
+                if tree is None:
+                    continue
+                aov_output_node = tree.nodes.new(type='ShaderNodeOutputAOV')
+                aov_output_node.aov_name = "face"
+                aov_output_node.inputs['Color'].default_value = (1.0, 1.0, 1.0, 1.0)
+            if material.name in eye_mat:
+                found_eye = True
+                tree = material.node_tree
+                if tree is None:
+                    continue
+                aov_mat = tree.nodes.new(type='ShaderNodeOutputAOV')
+                aov_mat.aov_name = "eye_mat"
+                aov_val = tree.nodes.new(type='ShaderNodeOutputAOV')
+                aov_val.aov_name = "eye_val"
+                aov_val.inputs['Value'].default_value = 1.0
+                image_texture_node = None
+                for node in tree.nodes:
+                        if node.type == 'TEX_IMAGE':
+                            image_texture_node = node #there should be only one
+                if image_texture_node:
+                    tree.links.new(image_texture_node.outputs[0],aov_mat.inputs[0])
+                aov_mat.location.y += 750
+                aov_val.location.y += 600
+            if material.name in hair_mat:
+                material.blend_method = 'BLEND'
+                material.show_transparent_back = False
+
+                
+        
+        if not found_face:
+            warning_flag = True
+            print("未找到面部材质!")
+            
+        if not found_eye:
+            print("未找到眼部材质!")
+        
+        
+        if warning_flag:
+            self.report({'WARNING'}, "出现错误,请查看日志!")
+        else:
+            self.report({'INFO'}, "已成功设置AOV!")
+        
+        return {'FINISHED'}
+
 
 def generate_compositor_scene():
 
 	# Generate unique scene name
-	base_name = "72craft的合成器场景"
+	base_name = SCENE_COMPOSITOR_BASE
 	end_name = base_name
 	if bpy.data.scenes.get(end_name) is not None:
 		i = 1
@@ -89,7 +219,7 @@ def generate_compositor_scene():
 
 		# Socket 辉光颜色
 		_____socket_1 = compos.interface.new_socket(name="辉光颜色", in_out='INPUT', socket_type='NodeSocketColor')
-		_____socket_1.default_value = (0.5028828978538513, 0.5028868913650513, 0.5028865933418274, 1.0)
+		_____socket_1.default_value = (0.32, 0.32, 0.32, 1.0)
 		_____socket_1.attribute_domain = 'POINT'
 		_____socket_1.default_input = 'VALUE'
 		_____socket_1.structure_type = 'AUTO'
@@ -103,9 +233,9 @@ def generate_compositor_scene():
 
 		# Socket 眼透系数
 		_____socket_3 = compos.interface.new_socket(name="眼透系数", in_out='INPUT', socket_type='NodeSocketFloat')
-		_____socket_3.default_value = 0.30000001192092896
+		_____socket_3.default_value = 0.300000
 		_____socket_3.min_value = 0.0
-		_____socket_3.max_value = 0.699999988079071
+		_____socket_3.max_value = 0.7
 		_____socket_3.subtype = 'NONE'
 		_____socket_3.attribute_domain = 'POINT'
 		_____socket_3.default_input = 'VALUE'
@@ -270,9 +400,9 @@ def generate_compositor_scene():
 		___001_2 = compos.nodes.new("CompositorNodeDisplace")
 		___001_2.name = "置换.001"
 		# X Scale
-		___001_2.inputs[2].default_value = 5.0
+		___001_2.inputs[2].default_value = 10.0
 		# Y Scale
-		___001_2.inputs[3].default_value = 5.0
+		___001_2.inputs[3].default_value = 10.0
 
 		# Node 运算.005
 		___005 = compos.nodes.new("ShaderNodeMath")
@@ -502,7 +632,7 @@ def generate_compositor_scene():
 		___5.name = "群组"
 		___5.node_tree = compos
 		# Socket_6
-		___5.inputs[6].default_value = (0.5028828978538513, 0.5028868913650513, 0.5028865933418274, 1.0)
+		___5.inputs[6].default_value = (0.32, 0.32, 0.32, 1.0)
 		# Socket_8
 		___5.inputs[7].default_value = (0.88525390625, 0.1956787109375, 0.2149658203125, 1.0)
 		# Socket_7

@@ -110,3 +110,65 @@ class Hz60(bpy.types.Operator):
         scene.render.frame_map_new = 60
         # Tell Blender the operator finished successfully
         return {'FINISHED'}
+    
+class P1080(bpy.types.Operator):
+    """设置输出为1080p"""
+    # Unique ID for the operator
+    bl_idname = "render.1080p"
+    # Name that appears in the Blender search menu
+    bl_label = "72craft_1080p"
+
+    # The execute() function runs when the operator is called
+    def execute(self, context):
+        scene = context.scene
+        render = scene.render
+        # Check if current resolution is horizontal (x > y)
+        if render.resolution_x > render.resolution_y:
+            # Horizontal: use 1920x1080
+            render.resolution_x = 1920
+            render.resolution_y = 1080
+        else:
+            # Vertical: use 1080x1920
+            render.resolution_x = 1080
+            render.resolution_y = 1920
+        return {'FINISHED'}
+
+class P2K(bpy.types.Operator):
+    """设置输出为2K"""
+    bl_idname = "render.2k"
+    bl_label = "72craft_2K"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        scene = context.scene
+        render = scene.render
+        # Check if current resolution is horizontal (x > y)
+        if render.resolution_x > render.resolution_y:
+            # Horizontal: use 2560x1440
+            render.resolution_x = 2560
+            render.resolution_y = 1440
+        else:
+            # Vertical: use 1440x2560
+            render.resolution_x = 1440
+            render.resolution_y = 2560
+        return {'FINISHED'}
+
+class P4K(bpy.types.Operator):
+    """设置输出为4K"""
+    bl_idname = "render.4k"
+    bl_label = "72craft_4K"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        scene = context.scene
+        render = scene.render
+        # Check if current resolution is horizontal (x > y)
+        if render.resolution_x > render.resolution_y:
+            # Horizontal: use 3840x2160
+            render.resolution_x = 3840
+            render.resolution_y = 2160
+        else:
+            # Vertical: use 2160x3840
+            render.resolution_x = 2160
+            render.resolution_y = 3840
+        return {'FINISHED'}

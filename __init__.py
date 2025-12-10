@@ -2,8 +2,8 @@ bl_info = {
     "name": "72craft的小插件",
     "description" : "Blender MMD小插件",
     "author": "72craft",
-    "version": (1, 3, 0),
-    "blender": (4, 3, 0),
+    "version": (0, 4, 0),
+    "blender": (4, 5, 0),
     "location": "View3D UI",
     "category": "Render",
     "doc_url": "https://github.com/A72craft",
@@ -23,9 +23,10 @@ from .constants import POSE_BONES
 from . import compositor
 from . import output
 from . import effect
+from . import presets
 
 # Force reload modules when addon is reloaded (useful during development)
-# This ensures changes to compositor.py, output.py, and effect.py are picked up
+# This ensures changes to compositor.py, output.py, effect.py, and presets.py are picked up
 try:
     importlib.reload(compositor)
 except:
@@ -38,11 +39,16 @@ try:
     importlib.reload(effect)
 except:
     pass
+try:
+    importlib.reload(presets)
+except:
+    pass
 
 # Import classes after reload
 from .compositor import *
 from .output import *
 from .effect import *
+from .presets import *
 
 
 class Pose(bpy.types.Operator):
@@ -113,6 +119,7 @@ class UI_Effect(bpy.types.Panel):
     bl_idname = "OBJECT_effect_set"   #工具ID
     bl_space_type = 'VIEW_3D'   #空间类型():3D视图
     bl_region_type = 'UI'       #区域类型:右边侧栏
+    bl_options = {'DEFAULT_CLOSED'}
     
     def draw(self, context):
         row1 = self.layout.row(align=True)
@@ -127,6 +134,7 @@ class UI_Pose(bpy.types.Panel):
     bl_idname = "OBJECT_poses_set"   #工具ID
     bl_space_type = 'VIEW_3D'   #空间类型():3D视图
     bl_region_type = 'UI'       #区域类型:右边侧栏
+    bl_options = {'DEFAULT_CLOSED'}
     
     def draw(self, context):  
         row1 = self.layout.row(align=True)
@@ -179,10 +187,11 @@ class UI_Composit(bpy.types.Panel):
 # ------------------------------------------------------------------
 
 classes = [
-    UI_Effect,UI_Pose,UI_Output,UI_Composit,
+    ImportMatPresetsUI,UI_Effect,UI_Pose,UI_Output,UI_Composit,
     Blush,RemoveBlush,
     Compositor,AOV,Pose,
-    Horizontal,Vertical,Hz30,Hz60,P1080,P2K,P4K
+    Horizontal,Vertical,Hz30,Hz60,P1080,P2K,P4K,
+    ImportMatPresets
 ]
 
 

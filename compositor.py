@@ -219,7 +219,7 @@ def generate_compositor_scene():
 
 		# Socket 辉光颜色
 		_____socket_1 = compos.interface.new_socket(name="辉光颜色", in_out='INPUT', socket_type='NodeSocketColor')
-		_____socket_1.default_value = (0.32, 0.32, 0.32, 1.0)
+		_____socket_1.default_value = (0.39, 0.39, 0.39, 1.0)
 		_____socket_1.attribute_domain = 'POINT'
 		_____socket_1.default_input = 'VALUE'
 		_____socket_1.structure_type = 'AUTO'
